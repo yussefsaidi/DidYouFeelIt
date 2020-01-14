@@ -34,7 +34,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        AsyncEarthquake task = new AsyncEarthquake();
+
+        // Create an {@link AsyncTask} to perform the HTTP request to the given URL
+        // on a background thread. When we get a result back, update the UI.
+        EarthquakeAsyncTask task = new EarthquakeAsyncTask();
         task.execute(USGS_REQUEST_URL);
     }
 
@@ -52,19 +55,39 @@ public class MainActivity extends AppCompatActivity {
         magnitudeTextView.setText(earthquake.perceivedStrength);
     }
 
-    private class AsyncEarthquake extends AsyncTask<String, Void, Event> {
 
+    /**
+     * {@link AsyncTask} to perform the network request on a background thread, and then
+     * update the UI with the first earthquake in the response.
+     */
+    private class EarthquakeAsyncTask extends AsyncTask<String, Void, Event> {
+
+        /**
+         * This method is called on a background thread, so we can perform
+         * long running operations such as network requests.
+         *
+         * It is NOT good to update the UI from a background thread, so we return
+         * an {@link Event} object instead.
+         */
         @Override
         protected Event doInBackground(String... strings) {
+            // Perform HTTP
             Event earthquake  = Utils.fetchEarthquakeData(strings[0]);
             return earthquake;
         }
 
+        /**
+         * This method is called on the main UI thread after the background work has been
+         * completed.
+         *
+         * It IS fine to modify the UI within this method. We take the {@link Event} object
+         * returned from doInBackground() and update the views on the screen.
+         */
         @Override
         protected void onPostExecute(Event event) {
             super.onPostExecute(event);
+            // Update UI with the given earthquake information
             updateUi(event);
         }
     }
-
 }
