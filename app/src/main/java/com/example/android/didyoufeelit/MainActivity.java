@@ -70,9 +70,14 @@ public class MainActivity extends AppCompatActivity {
          * an {@link Event} object instead.
          */
         @Override
-        protected Event doInBackground(String... strings) {
-            // Perform HTTP
-            Event earthquake  = Utils.fetchEarthquakeData(strings[0]);
+        protected Event doInBackground(String... urls) {
+            // Don't perform HTTP request if no urls, or the first one is null
+            if(urls.length < 0 || urls[0] == null){
+                return null;
+            }
+
+            // Perform HTTP request
+            Event earthquake  = Utils.fetchEarthquakeData(urls[0]);
             return earthquake;
         }
 
@@ -84,10 +89,13 @@ public class MainActivity extends AppCompatActivity {
          * returned from doInBackground() and update the views on the screen.
          */
         @Override
-        protected void onPostExecute(Event event) {
-            super.onPostExecute(event);
+        protected void onPostExecute(Event result) {
+            // If there is no result, do nothing
+            if(result == null)
+                return;
+
             // Update UI with the given earthquake information
-            updateUi(event);
+            updateUi(result);
         }
     }
 }
